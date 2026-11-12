@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#146a49">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="車行ERP">
+<title>車行 ERP 系統</title>
+<link rel="icon" type="image/x-icon" href="./icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Noto Sans TC",sans-serif;background:linear-gradient(135deg,#eef5f1,#f5f8fa);min-height:100vh;display:grid;place-items:center;padding:24px;color:#203040}.box{background:#fff;max-width:560px;width:100%;border-radius:24px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.08);border:1px solid #e5ebef}.brand{display:flex;align-items:center;gap:14px}.brand img{width:58px;height:58px;border-radius:16px}.muted{font-size:13px;line-height:1.9;color:#667788}.btn{display:block;text-align:center;background:#146a49;border-radius:12px;padding:15px 18px;color:white;text-decoration:none;font-weight:800;margin-top:18px}.btn.secondary{background:#fff;border:1px solid #d8e0e6;color:#33485b}.hint{border:1px solid #ecd6a7;background:#fff9ec;color:#936d22;border-radius:10px;padding:12px;font-size:12px;line-height:1.8;margin-top:14px}.small{font-size:12px;color:#728191}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}@media(max-width:640px){.actions{grid-template-columns:1fr}.box{padding:24px}.brand img{width:52px;height:52px}}</style>
+</head>
+<body>
+<main class="box">
+  <div class="brand">
+    <img src="./icons/android-chrome-192x192.png" alt="車行ERP圖標">
+    <div>
+      <div style="font-size:12px;color:#6b7b89;letter-spacing:.08em">CAR DEALER ERP</div>
+      <h1 style="margin:2px 0 0;font-size:28px">車行 ERP 系統</h1>
+    </div>
+  </div>
+  <p class="muted">員工查車、月報、工具列；管理員上架、整備成本、廠商結算、照片歸檔與成交管理。這是 GitHub 入口頁，正式資料操作會導向 Google Apps Script 後端。</p>
+  <div id="warning" class="hint" style="display:none">尚未設定 Google Apps Script 部署網址。請編輯本檔內的 <code>GOOGLE_WEB_APP_URL</code>，填入部署完成的 <code>/exec</code> 網址後再上傳 GitHub。</div>
+  <div class="actions">
+    <a id="go" class="btn" href="#">開啟正式系統</a>
+    <a class="btn secondary" href="./ERP_UI_Preview_v4.html">先看 UI 預覽</a>
+  </div>
+  <p class="small">提示：把這個 GitHub 頁面加入手機主畫面時，會使用本資料夾內的圖標與名稱。</p>
+</main>
+<script>
+const GOOGLE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyZicaVGE9b5MSJBZ4qVqUSIDgO8Op9mXGjcog4H-_MxnoZ0xfxa9KIwarQ2sBX9Kxw/exec';
+const valid=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/;
+const button=document.getElementById('go');
+if(valid.test(GOOGLE_WEB_APP_URL)){
+  button.href=GOOGLE_WEB_APP_URL;
+  setTimeout(()=>location.replace(GOOGLE_WEB_APP_URL),500);
+}else{
+  document.getElementById('warning').style.display='block';
+  button.onclick=e=>{e.preventDefault();alert('請先設定 Apps Script /exec 部署網址');};
+}
+</script>
+</body>
+</html>
