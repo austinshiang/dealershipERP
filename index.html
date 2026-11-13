@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173c31"><meta name="description" content="車行 ERP 雙入口：員工唯讀車源與 Google 管理員後台">
+<title>車行 ERP｜工作入口</title><link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/style.css"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<script defer src="site-config.js"></script><script defer src="assets/portal.js"></script>
+</head><body class="portal-body">
+<div class="portal-wrap">
+  <header class="portal-head"><div class="identity"><div class="logo">▰</div><div><strong id="portal-brand">車行 ERP</strong><small>VEHICLE WORKSPACE · V3.7</small></div></div><span class="chip soft">雙入口 · 不使用中介</span></header>
+  <section class="portal-intro"><p class="eyebrow">WORKSPACE ACCESS</p><h1>工作需要的資訊，<br>從這裡開始。</h1><p>使用同一套 Google 工作表資料，依照工作需求進入不同介面。員工端只讀取已發布的車源資訊；管理員在 Google 後台處理更新與上傳。</p></section>
+  <main class="gateway-grid">
+    <a class="gateway staff-gateway" href="staff.html"><div class="gateway-icon">↗</div><span class="gateway-tag">STAFF · READ ONLY</span><h2>一般業務／唯讀查車</h2><p>查車、篩選、相片預覽、列印清單、貸款試算。不提供任何修改、上傳或後台操作。</p><span class="gateway-action">開啟員工車源 <b aria-hidden="true">→</b></span></a>
+    <a class="gateway admin-gateway" id="admin-entry" href="#" aria-disabled="true"><div class="gateway-icon">⚙</div><span class="gateway-tag">ADMIN · GOOGLE</span><h2>管理員／資料管理後台</h2><p>沿用 Google Apps Script 正式版：新增車輛、修改價格、收訂售出、整備、廠商結算、照片上傳及帳號管理。</p><span class="gateway-action">前往管理後台 <b aria-hidden="true">→</b></span></a>
+  </main>
+  <section class="portal-foot-note"><strong>資料與權限提醒</strong><p>GitHub 員工端是公開靜態網頁，任何知道網址的人都可能看到已發布資料。車號、車身碼、底價、成本、客戶資料及私人備註不會包含在員工快照中。更新後請由管理員按「發布員工車源」，頁面才會取得最新資料。</p><p class="small-muted" id="config-alert" role="status"></p></section>
+  <footer class="portal-footer">ERP V3.7 · GitHub 員工唯讀端／Google 管理後台</footer>
+</div>
+</body></html>
