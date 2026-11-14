@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173c31"><meta name="description" content="車行 ERP 唯讀車源與貸款試算">
+<title>車行 ERP｜員工查車</title><link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/style.css?v=3.8.4"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><script defer src="site-config.js"></script><script defer src="assets/staff.js?v=3.8.4"></script>
+<script>
+window.addEventListener('error', function(ev) {
+  var msg=document.getElementById('message'), count=document.getElementById('result-count');
+  if(msg && count && count.textContent.indexOf('讀取')!==-1) {
+    msg.textContent='前台程式執行失敗：'+(ev.message||'未知錯誤')+'。請確認 assets/staff.js 已更新到 V3.8.1。';
+    msg.classList.remove('hidden');msg.classList.add('error');count.textContent='載入失敗';
+  }
+});
+window.addEventListener('load', function(){
+ setTimeout(function(){
+  var count=document.getElementById('result-count'),msg=document.getElementById('message');
+  if(count && msg && (count.textContent==='載入中…'||count.textContent==='正在讀取…')) {
+   msg.textContent='前台啟動逾時：請確認 index.html 與 assets/staff.js 使用相同版本（V3.8.1）。';
+   msg.classList.remove('hidden');msg.classList.add('error');count.textContent='載入逾時';
+  }
+ },18000);
+});
+</script></head><body>
+<header class="staff-header"><div class="staff-shell staff-header-in">
+  <a href="./" class="identity identity-link"><div class="logo">▰</div><div><strong id="staff-brand">車行 ERP</strong><small>STAFF INVENTORY · READ ONLY</small></div></a>
+  <nav class="header-actions"><a href="#" class="small-link" id="staff-admin-link" aria-disabled="true">登入後台</a><span class="chip">唯讀模式</span></nav>
+</div></header>
+<main class="staff-shell staff-main">
+  <section class="staff-hero"><div><p class="eyebrow">INVENTORY VIEW</p><h1>車源總覽</h1><p>車輛資訊以管理員最近一次發布的資料為準，不等同即時成交狀態。</p></div><div class="hero-stats"><div><strong id="count-stock">—</strong><span>非售出</span></div><div><strong id="count-reserved">—</strong><span>收訂</span></div><div><strong id="count-incoming">—</strong><span>即將到港</span></div></div></section>
+  <div class="public-warning">這是公開唯讀資料。確認報價或收訂前，請向管理員核實最新狀態。</div>
+  <section class="toolbar panel-lite" aria-label="車輛搜尋與篩選">
+   <div class="toolbar-grid"><label class="field search"><span>車輛搜尋</span><input id="search" type="search" placeholder="廠牌、型號、年份、配備…" autocomplete="off"></label>
+    <div class="field"><span>廠牌（可複選）</span><details class="multi-select"><summary id="filter-label-brand">廠牌 · 全部</summary><div class="multi-menu" id="filter-brand"></div></details></div>
+    <div class="field"><span>在庫位子（可複選）</span><details class="multi-select"><summary id="filter-label-location">在庫位子 · 全部</summary><div class="multi-menu" id="filter-location"></div></details></div>
+    <div class="field"><span>車輛狀態（可複選）</span><details class="multi-select"><summary id="filter-label-status">車輛狀態 · 已選 3</summary><div class="multi-menu" id="filter-status"></div></details></div>
+    <div class="field"><span>售賣形式（可複選）</span><details class="multi-select"><summary id="filter-label-sale-type">售賣形式 · 全部</summary><div class="multi-menu" id="filter-sale-type"></div></details></div>
+    <label class="field"><span>排序</span><select id="sort"><option value="newest">最新購入</option><option value="age">在庫最久</option><option value="price-asc">價格低到高</option><option value="price-desc">價格高到低</option><option value="km">里程低到高</option></select></label>
+   </div>
+   <div class="toolbar-bottom"><div><button class="btn-lite" id="filters-clear" type="button">清除篩選</button> <strong id="result-count">載入中…</strong><span id="published-at" class="small-muted"></span></div><div class="toolbar-buttons"><button class="btn-lite" id="refresh">↻ 重新讀取</button><button class="btn-lite" id="loan-open">貸款試算</button><button class="btn-primary" id="print-open">列印清單</button></div></div>
+  </section>
+  <section aria-label="車源清單"><div class="section-title"><h2>車輛列表</h2><span id="selection-count" class="small-muted"></span></div><div id="message" class="message-box" role="status">正在讀取最新車源…</div><div id="car-grid" class="cars-grid"></div></section>
+  <footer class="staff-footer">ERP V3.8.3 · GitHub Pages 唯讀車源。資料可能有發布延遲。</footer>
+</main>
+<div class="overlay hidden" id="car-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="detail-dialog"><div class="dialog-bar"><div><span class="eyebrow">VEHICLE DETAILS</span><h2 id="modal-title">車輛詳情</h2></div><button class="icon-button" id="modal-close" aria-label="關閉詳情">×</button></div><div class="detail-body" id="modal-body"></div></div></div>
+<div class="overlay hidden" id="loan-modal" role="dialog" aria-modal="true" aria-labelledby="loan-title"><div class="small-dialog"><div class="dialog-bar"><h2 id="loan-title">車貸試算機</h2><button class="icon-button" id="loan-close" aria-label="關閉貸款試算">×</button></div><p class="small-muted">本息平均攤還示意，未包含手續費、動保費及其他費用。</p><div class="loan-fields"><label>車價（萬元）<input id="loan-price" type="number" min="0" value="100" step="0.1"></label><label>頭期款（萬元）<input id="loan-down" type="number" min="0" value="20" step="0.1"></label><label>年利率（%）<input id="loan-rate" type="number" min="0" value="4" step="0.1"></label><label>期數（月）<select id="loan-months"><option value="24">24</option><option value="36">36</option><option value="48">48</option><option value="60" selected>60</option><option value="72">72</option><option value="84">84</option></select></label></div><div class="loan-result"><span>預估每月繳款</span><strong id="loan-monthly">—</strong><small id="loan-details"></small></div><p id="loan-error" class="error-line" role="status"></p></div></div>
+<div class="lightbox hidden" id="lightbox" role="dialog" aria-modal="true" aria-label="全螢幕照片"><button class="lightbox-close" id="lightbox-close">關閉 ×</button><button id="lightbox-prev" class="lightbox-prev" aria-label="上一張">‹</button><img id="lightbox-img" alt="車輛照片"><button id="lightbox-next" class="lightbox-next" aria-label="下一張">›</button><div class="lightbox-caption" id="lightbox-caption"></div></div>
+<div id="print-sheet" class="print-sheet"></div>
+</body></html>
