@@ -63,7 +63,7 @@ body{background:#fff}
 
 /* 車卡圖片位置調整 */
 .image-wrap {
-  --photo-y: 0px; /* 圖片上下位置，可自行調整 */
+  --photo-y: 200px; /* 圖片上下位置，可自行調整 */
   position: relative;
   overflow: hidden !important;
 }
@@ -74,7 +74,7 @@ body{background:#fff}
   left: 0 !important;
   top: var(--photo-y) !important;
 
-  width: 30% !important;
+  width: 100% !important;
   height: auto !important;
   max-width: none !important;
   max-height: none !important;
