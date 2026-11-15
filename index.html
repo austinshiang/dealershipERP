@@ -2,14 +2,14 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173c31"><meta name="description" content="車行 ERP 唯讀車源與貸款試算">
 <title>車行 ERP｜員工查車</title><link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="stylesheet" href="assets/style.css?v=4.2.0?v=4.1.0"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><script defer src="site-config.js"></script><script defer src="assets/staff.js?v=4.2.0"></script>
+<link rel="stylesheet" href="assets/style.css?v=4.3.0"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><script defer src="site-config.js"></script><script defer src="assets/staff.js?v=4.3.0"></script>
 <script>
 window.addEventListener('error', function(ev) {
   var msg=document.getElementById('message'), count=document.getElementById('result-count');
   var gate=document.getElementById('staff-gate-note');
   if(gate && document.getElementById('staff-gate') && !document.getElementById('staff-gate').classList.contains('hidden')) { gate.textContent='員工頁程式發生錯誤：'+(ev.message||'未知錯誤');gate.classList.add('error'); }
   if(msg && count && count.textContent.indexOf('讀取')!==-1) {
-    msg.textContent='前台程式執行失敗：'+(ev.message||'未知錯誤')+'。請確認 assets/staff.js 已更新到 V4.0。';
+    msg.textContent='前台程式執行失敗：'+(ev.message||'未知錯誤')+'。請確認 assets/staff.js 已更新到 V4.3。';
     msg.classList.remove('hidden');msg.classList.add('error');count.textContent='載入失敗';
   }
 });
@@ -17,7 +17,7 @@ window.addEventListener('load', function(){
  setTimeout(function(){
   var count=document.getElementById('result-count'),msg=document.getElementById('message');
   if(count && msg && (count.textContent==='載入中…'||count.textContent==='正在讀取…')) {
-   msg.textContent='前台啟動逾時：請確認 index.html 與 assets/staff.js 使用相同版本（V4.0）。';
+   msg.textContent='前台啟動逾時：請確認 index.html 與 assets/staff.js 使用相同版本（V4.3）。';
    msg.classList.remove('hidden');msg.classList.add('error');count.textContent='載入逾時';
   }
  },18000);
@@ -46,7 +46,9 @@ window.addEventListener('load', function(){
   <nav class="header-actions"><a href="#" class="small-link" id="staff-admin-link" aria-disabled="true">登入後台</a><button type="button" class="small-link" id="staff-logout" style="border:0;background:transparent;cursor:pointer">離開唯讀</button><span class="chip">唯讀模式</span></nav>
 </div></header>
 <main class="staff-shell staff-main">
-  <section class="staff-hero"><div><p class="eyebrow">INVENTORY VIEW</p><h1 id="staff-banner-title">車源總覽</h1><p id="staff-banner-subtitle">車輛資訊以管理員最近一次發布的資料為準，不等同即時成交狀態。</p></div><div class="hero-stats"><div><strong id="count-stock">—</strong><span>非售出</span></div><div><strong id="count-reserved">—</strong><span>收訂</span></div><div><strong id="count-incoming">—</strong><span>即將到港</span></div></div></section>
+  <div class="staff-notice hidden" id="staff-notice"><b>公告</b><div class="staff-notice-clip"><span id="staff-notice-text"></span></div></div>
+<section class="staff-home" aria-label="首頁展示圖片"><div id="staff-home-photo" class="staff-home-photo"><div class="staff-home-empty">DEALERSHIP · VEHICLE SHOWCASE</div></div><div class="staff-home-overlay"><strong>精選車源 · 車行 ERP</strong><small id="staff-home-counter">首頁圖片尚未發布</small></div><div class="staff-home-nav"><button type="button" id="staff-home-prev" aria-label="上一張">‹</button><button type="button" id="staff-home-next" aria-label="下一張">›</button></div><div id="staff-home-dots" class="staff-home-dots"></div></section>
+<div class="staff-inventory-overview"><div><strong id="count-stock">—</strong><span>非售出</span></div><div><strong id="count-reserved">—</strong><span>收訂</span></div><div><strong id="count-incoming">—</strong><span>即將到港</span></div></div>
   <div class="public-warning">這是公開唯讀資料。確認報價或收訂前，請向管理員核實最新狀態。</div>
   <section class="toolbar panel-lite" aria-label="車輛搜尋與篩選">
    <div class="toolbar-grid"><label class="field search"><span>車輛搜尋</span><input id="search" type="search" placeholder="廠牌、型號、年份、配備…" autocomplete="off"></label>
@@ -59,7 +61,7 @@ window.addEventListener('load', function(){
    <div class="toolbar-bottom"><div><button class="btn-lite" id="filters-clear" type="button">清除篩選</button> <strong id="result-count">載入中…</strong><span id="published-at" class="small-muted"></span></div><div class="toolbar-buttons"><button class="btn-lite" id="refresh">↻ 重新讀取</button><button class="btn-lite" id="loan-open">貸款試算</button><button class="btn-lite" id="tools-open">常用工具</button><button class="btn-primary" id="print-open">列印清單</button></div></div>
   </section>
   <section aria-label="車源清單"><div class="section-title"><h2>車輛列表</h2><span id="selection-count" class="small-muted"></span></div><div id="message" class="message-box" role="status">正在讀取最新車源…</div><div id="car-grid" class="cars-grid"></div></section>
-  <footer class="staff-footer">ERP V4.2 · GitHub Pages 唯讀車源。資料可能有發布延遲。</footer>
+  <footer class="staff-footer">ERP V4.3 · GitHub Pages 唯讀車源。資料可能有發布延遲。</footer>
 </main></div>
 <div class="overlay hidden" id="car-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="detail-dialog"><div class="dialog-bar"><div><span class="eyebrow">VEHICLE DETAILS</span><h2 id="modal-title">車輛詳情</h2></div><button class="icon-button" id="modal-close" aria-label="關閉詳情">×</button></div><div class="detail-body" id="modal-body"></div></div></div>
 <div class="overlay hidden" id="loan-modal" role="dialog" aria-modal="true" aria-labelledby="loan-title"><div class="small-dialog"><div class="dialog-bar"><h2 id="loan-title">車貸試算機</h2><button class="icon-button" id="loan-close" aria-label="關閉貸款試算">×</button></div><p class="small-muted">本息平均攤還示意，未包含手續費、動保費及其他費用。</p><div class="loan-fields"><label>車價（萬元）<input id="loan-price" type="number" min="0" value="100" step="0.1"></label><label>頭期款（萬元）<input id="loan-down" type="number" min="0" value="20" step="0.1"></label><label>年利率（%）<input id="loan-rate" type="number" min="0" value="4" step="0.1"></label><label>期數（月）<select id="loan-months"><option value="24">24</option><option value="36">36</option><option value="48">48</option><option value="60" selected>60</option><option value="72">72</option><option value="84">84</option></select></label></div><div class="loan-result"><span>預估每月繳款</span><strong id="loan-monthly">—</strong><small id="loan-details"></small></div><p id="loan-error" class="error-line" role="status"></p></div></div>
