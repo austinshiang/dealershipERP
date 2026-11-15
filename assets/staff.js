@@ -2,7 +2,7 @@
 (function(){
   const $=id=>document.getElementById(id);
   const cfg=window.ERP_SITE||{};
-  const st={cars:[],shown:[],selected:new Set(),car:null,images:[],photo:0,loading:false,staffDoc:null};
+  const st={cars:[],shown:[],selected:new Set(),car:null,images:[],photo:0,loading:false,staffDoc:null,homeBanners:[],homeIndex:0,homeTimer:null};
   const safe=v=>String(v===null||v===undefined?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const n=v=>Number(v)||0;
   const val=id=>$(id)?$(id).value:'';
@@ -124,15 +124,24 @@
       st.staffDoc=doc;await load(doc);
     }catch(err){showGateMessage(err.message||String(err),true);}finally{b.disabled=false;}
   }
-  function showAnnouncement(text){const parts=String(text||'').split(' — ');
-    if(parts.length>1){$('staff-banner-title').textContent=parts.shift()||'車源公告';$('staff-banner-subtitle').textContent=parts.join(' — ');}
-    else if(text){$('staff-banner-title').textContent='車源公告';$('staff-banner-subtitle').textContent=String(text);}
+  function showAnnouncement(text){const value=String(text||'').trim();$('staff-notice').classList.toggle('hidden',!value);$('staff-notice-text').textContent=value;}
+  function showHomeV43(){const list=st.homeBanners,root=$('staff-home-photo');if(!root)return;
+    if(!list.length){root.innerHTML='<div class="staff-home-empty">DEALERSHIP · VEHICLE SHOWCASE</div>';$('staff-home-counter').textContent='尚無首頁輪播圖';$('staff-home-dots').innerHTML='';return;}
+    st.homeIndex=((st.homeIndex%list.length)+list.length)%list.length;
+    root.innerHTML='<img src="'+safe(list[st.homeIndex])+'" alt="首頁輪播 '+(st.homeIndex+1)+'" loading="eager">';
+    $('staff-home-counter').textContent=(st.homeIndex+1)+' / '+list.length;
+    $('staff-home-dots').innerHTML=list.map((_,i)=>'<button data-staff-dot="'+i+'" type="button" class="'+(i===st.homeIndex?'selected':'')+'" aria-label="第 '+(i+1)+' 張"></button>').join('');
   }
+  function setHomeImagesV43(data){st.homeBanners=Array.isArray(data)?data.map(safeURL).filter(Boolean).slice(0,8):[];st.homeIndex=0;showHomeV43();
+    if(st.homeTimer)clearInterval(st.homeTimer);st.homeTimer=null;
+    if(st.homeBanners.length>1&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)st.homeTimer=setInterval(()=>{if(!$('staff-app').classList.contains('hidden')){st.homeIndex++;showHomeV43();}},5500);
+  }
+
   async function load(prefetched){if(st.loading)return;st.loading=true;$('refresh').disabled=true;$('result-count').textContent='正在讀取…';
     const m=$('message');m.classList.remove('hidden','error');m.textContent='正在讀取已發布的車輛資料…';
     try{
       const doc=prefetched||await getStaffDoc();
-      showAnnouncement(doc.announcement);
+      showAnnouncement(doc.announcement);setHomeImagesV43(doc.homeBanners);
       // 前端再次限制欄位：即使 GitHub 被誤放其他資訊，也不予顯示。這不取代後端過濾。
       st.cars=doc.items.map((x,i)=>({
         '廠牌':x['廠牌']||'', '型號':x['型號']||'', '年份':x['年份']||'',
@@ -211,7 +220,8 @@
     else if(box.value.length<128)box.value+=v;
     box.dispatchEvent(new Event('input',{bubbles:true}));
   });
-  $('staff-logout').addEventListener('click',()=>{st.cars=[];st.shown=[];st.staffDoc=null;$('car-grid').innerHTML='';$('staff-app').classList.add('hidden');$('staff-gate').classList.remove('hidden');showGateMessage('已離開唯讀模式，請重新輸入入口密碼。',false);});
+  $('staff-home-prev').addEventListener('click',()=>{st.homeIndex--;showHomeV43();});$('staff-home-next').addEventListener('click',()=>{st.homeIndex++;showHomeV43();});$('staff-home-dots').addEventListener('click',e=>{const b=e.target.closest('[data-staff-dot]');if(b){st.homeIndex=Number(b.dataset.staffDot);showHomeV43();}});
+  $('staff-logout').addEventListener('click',()=>{if(st.homeTimer){clearInterval(st.homeTimer);st.homeTimer=null;}st.cars=[];st.shown=[];st.staffDoc=null;$('car-grid').innerHTML='';$('staff-app').classList.add('hidden');$('staff-gate').classList.remove('hidden');showGateMessage('已離開唯讀模式，請重新輸入入口密碼。',false);});
   $('tools-open').addEventListener('click',()=>$('tools-modal').classList.remove('hidden'));
   $('tools-close').addEventListener('click',()=>$('tools-modal').classList.add('hidden'));
   $('tools-loan').addEventListener('click',()=>{$('tools-modal').classList.add('hidden');$('loan-open').click();});
