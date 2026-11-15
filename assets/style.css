@@ -95,3 +95,11 @@ body{background:#fff}
 .image-wrap{--photo-y:0px;overflow:hidden;position:relative}
 .image-wrap img{position:absolute!important;inset:auto!important;left:0!important;top:calc(50% + var(--photo-y))!important;width:100%!important;height:auto!important;max-width:none!important;max-height:none!important;transform:translateY(-50%)!important;object-fit:unset!important}
 @media print{.staff-print-head,.staff-print-foot{-webkit-print-color-adjust:exact;print-color-adjust:exact}.print-card img{object-fit:contain!important}.print-intro{display:none}}
+
+/* V4.1 已售出強調：只在售出車卡呈現，不阻擋滑鼠點入詳情 */
+.sold-card .image-wrap{position:relative}
+.sold-stamp{position:absolute;z-index:5;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);padding:10px 20px 9px;border:4px double #b7353f;border-radius:7px;background:rgba(255,249,249,.92);box-shadow:0 5px 18px rgba(30,20,20,.14);color:#aa2839;font-size:clamp(21px,3vw,38px);font-weight:950;letter-spacing:.08em;line-height:1;pointer-events:none;text-align:center}
+.sold-stamp small{display:block;font-size:11px;letter-spacing:.25em;margin-top:6px}
+.sold-date{width:100%;font-size:11px;font-weight:800;color:#ac3b45;background:#fff2f2;border-radius:5px;padding:5px 7px;margin-top:2px}
+.sold-detail-note{display:block;margin:10px 0;padding:10px 13px;border:2px solid #c14452;background:#fff3f3;color:#ad3142;font-weight:850;letter-spacing:.04em;border-radius:8px}
+@media(max-width:560px){.sold-stamp{font-size:22px;padding:7px 12px;border-width:3px}.sold-stamp small{font-size:9px}}

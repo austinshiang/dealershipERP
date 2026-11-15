@@ -19,6 +19,18 @@
   function carPrice(c){const value=c['新價格'];return value===''||value===null||value===undefined?c['開價']:value;}
   function statusClass(s){return s==='收訂'?'reserved':s==='即將到港'?'incoming':s==='售出'?'sold':'';}
   function mileage(c){const v=c['里程'];if(v===''||v===null||v===undefined)return '—';let a=parseFloat(v);if(!Number.isFinite(a))return '—';return a.toLocaleString('zh-TW',{maximumFractionDigits:1})+' 萬公里';}
+  const PANO_ENGINE_V41='https://austinshiang.github.io/360-Showcase-Engine/';
+  function panoramaHref(raw,vehicleTitle){
+    const url=safeURL(raw);if(!url)return '';
+    try{
+      const u=new URL(url);
+      if(u.hostname==='austinshiang.github.io'&&u.pathname.toLowerCase().replace(/\/$/,'')==='/360-showcase-engine')return url;
+      if(/\.(?:jpe?g|png|webp)(?:$|[?#])/i.test(url)||/^(?:drive\.google\.com|lh3\.googleusercontent\.com)$/.test(u.hostname))
+        return PANO_ENGINE_V41+'?url='+encodeURIComponent(url)+'&title='+encodeURIComponent(vehicleTitle||'360° 實境賞車');
+      return url;
+    }catch(e){return '';}
+  }
+  function soldDate(c){return String(c['成交日期']||'').trim()||'未登錄';}
   const isSold=c=>c['販售狀態']==='售出';
   function unique(field){return [...new Set(st.cars.map(c=>String(c[field]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW'));}
   const filterDefs={brand:['廠牌','廠牌'],location:['在庫位子','在庫位子'],status:['販售狀態','車輛狀態'],'sale-type':['售賣形式','售賣形式']};
@@ -66,11 +78,11 @@
       '燃料 '+String(c['燃料形式']||'—')
     ];
     return '<article class="car-card '+locClass(location)+' '+(isSold(c)?'sold-card':'')+' '+(status==='收訂'?'reserved-card':'')+'" tabindex="0" role="button" data-car="'+index+'" aria-label="查看 '+safe(name)+' 詳情">'+
-      '<div class="image-wrap">'+showPhoto(c)+'<span class="status-badge '+statusClass(status)+'">'+safe(status)+'</span></div>'+
+      '<div class="image-wrap">'+showPhoto(c)+'<span class="status-badge '+statusClass(status)+'">'+safe(status)+'</span>'+(isSold(c)?'<span class="sold-stamp" aria-label="已售出">SOLD<small>已售出</small></span>':'')+'</div>'+
       '<div class="card-info">'+
         '<h3>'+safe(name)+'</h3>'+
         '<div class="tiny-tags"><span class="tiny-tag location-tag">● '+safe(location)+'</span><span class="tiny-tag sale '+(sale==='寄賣'?'consignment':'')+'">'+safe(sale)+'</span>'+(c['優惠標籤']?'<span class="tiny-tag">'+safe(c['優惠標籤'])+'</span>':'')+'</div>'+
-        '<div class="card-date"><span>購入 '+safe(c['購入日期']||'—')+'</span><span class="age '+ageClass(c)+'">'+safe(ageLabel(c))+'</span></div>'+
+        '<div class="card-date"><span>購入 '+safe(c['購入日期']||'—')+'</span><span class="age '+ageClass(c)+'">'+safe(ageLabel(c))+'</span>'+(isSold(c)?'<span class="sold-date">成交日期 '+safe(soldDate(c))+'</span>':'')+'</div>'+
         '<div class="card-specs">'+specs.map(t=>'<span>'+safe(t)+'</span>').join('')+'</div>'+
         '<div class="price-row">'+(discounted?'<div class="old-price">原價 '+safe(format(original))+' 萬</div>':'<span></span>')+'<strong>'+safe(format(p))+'<small> 萬</small></strong></div>'+
       '</div></article>';
@@ -146,12 +158,13 @@
     const img=st.images.length?'<img id="featured-img" src="'+safe(st.images[0])+'" alt="車輛照片">':'<span class="no-photo">尚未提供照片</span>';
     const thumbs=st.images.map((u,i)=>'<button type="button" class="thumb '+(i===0?'selected':'')+'" data-photo="'+i+'" aria-label="預覽第 '+(i+1)+' 張照片"><img src="'+safe(u)+'" alt="照片縮圖"></button>').join('');
     const fields=[['在庫位子',c['在庫位子']],['售賣形式',c['售賣形式']],['車輛狀態',c['販售狀態']],['購入日期',c['購入日期']],
-      ['在庫天數／銷售期',ageLabel(c)],['年份',c['年份']],['排氣量',c['排氣量']],['顏色',c['顏色']],['里程',mileage(c)],
+      ['在庫天數／銷售期',ageLabel(c)],['售出日期',isSold(c)?soldDate(c):'—'],['年份',c['年份']],['排氣量',c['排氣量']],['顏色',c['顏色']],['里程',mileage(c)],
       ['燃料形式',c['燃料形式']],['開價（萬元）',format(c['開價'])],['新價格（萬元）',format(c['新價格'])],['是否認證',c['是否認證']]];
     $('modal-body').innerHTML='<div id="featured" class="detail-main-photo" role="button" tabindex="0" aria-label="開啟全螢幕照片">'+img+'</div>'+(
       thumbs?'<div id="thumbs" class="detail-thumbs">'+thumbs+'</div>':'')+
       '<div class="detail-summary"><div><span class="eyebrow">'+safe(c['販售狀態'])+' · '+safe(c['售賣形式'])+'</span><h3>'+safe([c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' '))+'</h3></div><div class="detail-price">'+safe(format(carPrice(c)))+' 萬</div></div>'+
-      '<div class="detail-actions">'+(safeURL(c['認證書網址'])?'<a class="btn-lite" href="'+safe(safeURL(c['認證書網址']))+'" target="_blank" rel="noopener noreferrer">檢視／下載認證書 ↗</a>':'')+(safeURL(c['360網址'])?'<a class="btn-lite" href="'+safe(safeURL(c['360網址']))+'" target="_blank" rel="noopener noreferrer">開啟 360° 導覽 ↗</a>':'')+'</div>'+
+      (isSold(c)?'<div class="sold-detail-note">SOLD · 已售出　成交日期：'+safe(soldDate(c))+'</div>':'')+
+      '<div class="detail-actions">'+(safeURL(c['認證書網址'])?'<a class="btn-lite" href="'+safe(safeURL(c['認證書網址']))+'" target="_blank" rel="noopener noreferrer">檢視／下載認證書 ↗</a>':'')+(panoramaHref(c['360網址'],[c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' '))?'<a class="btn-lite" href="'+safe(panoramaHref(c['360網址'],[c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' ')))+'" target="_blank" rel="noopener noreferrer">360° 全景賞車 ↗</a>':'')+'</div>'+
       '<div class="detail-grid">'+fields.map(([a,b])=>pair(a,b)).join('')+'</div>'+
       (c['公開配備']?'<h3>車輛特色與配備</h3><div class="detail-note">'+safe(c['公開配備'])+'</div>':'')+
       '<p class="small-muted">公開唯讀快照僅供參考，成交與報價前請向管理員再次核實。</p>';
