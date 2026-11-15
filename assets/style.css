@@ -60,27 +60,38 @@ body{background:#fff}
 @media(max-width:440px){.car-card{min-height:185px}.image-wrap{min-height:185px;flex-basis:43%;width:43%}.card-info{padding:10px 9px 10px 8px}.card-info h3{font-size:13px}.card-specs{grid-template-columns:repeat(2,minmax(0,1fr));font-size:10px;gap:4px}.card-date{font-size:10px}.age{padding:4px 6px;font-size:10px}.price-row strong{font-size:24px}.detail-main-photo{height:min(46vh,350px)}}
 @media print{.cars-grid{display:none!important}}
 
+/* V3.9 GitHub read-only image and gate */
+.image-wrap{padding:0!important;overflow:hidden!important}
+.image-wrap img{position:absolute!important;left:0!important;right:auto!important;top:50%!important;bottom:auto!important;inset:auto!important;width:100%!important;height:auto!important;max-height:none!important;max-width:none!important;transform:translateY(-50%)!important;object-fit:unset!important;display:block!important}
+/* The source width always fits the image box. Square photos fill its width; only top/bottom may crop. */
+.staff-gate{min-height:100dvh;padding:22px;background:radial-gradient(circle at 95% 0%,#d6e9dd,transparent 45%),#f4f7f5;display:grid;place-items:center}
+.staff-gate-panel{background:#fff;border:1px solid #dfebe2;border-radius:19px;box-shadow:0 20px 65px rgba(26,67,49,.10);padding:31px;width:min(100%,430px);display:flex;flex-direction:column;gap:14px}
+.staff-gate-panel h1{font-size:27px;margin:0;color:#234737}.staff-gate-panel p{margin:0;line-height:1.7}
+.staff-gate-panel label{font-size:12px;font-weight:800;color:#586e63}.staff-gate-panel input{width:100%;border:1px solid #cfddd4;background:#f9fbf9;border-radius:9px;padding:13px 12px;font-size:16px}
+.staff-gate-panel .btn-primary{font-size:14px}.gate-mark{font-size:36px;color:#20664c}
+.staff-gate-panel #staff-gate-note.error{color:#b33d4a}.staff-gate-panel .small-link{margin-top:5px}
+.detail-actions{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0 16px}
+.detail-actions .btn-lite{display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:600px){.staff-gate-panel{padding:25px 20px}.image-wrap img{width:100%!important;height:auto!important}}
+@media print{.staff-gate,#tools-modal{display:none!important}}
 
+/* V4.0: centered premium numeric entry */
+.staff-gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% -28%,#dce9e1 0%,transparent 55%),#f6f8f7}
+.staff-gate-panel{width:min(100%,410px);margin:auto;background:#fff;border:1px solid #e3eae7;box-shadow:0 28px 90px rgba(16,57,39,.095);border-radius:24px;padding:30px 32px 28px;display:flex;flex-direction:column;align-items:stretch;gap:13px;text-align:center}
+.staff-gate-panel .gate-mark{width:54px;height:54px;margin:0 auto;background:#1f5d46;border-radius:16px;display:grid;place-items:center;color:#fff;box-shadow:0 12px 24px #21594022;font-size:29px}
+.staff-gate-panel h1{font-size:25px;letter-spacing:.02em;color:#203d32;margin:0}
+.staff-gate-panel p{line-height:1.65;margin:0}.staff-gate-panel label{text-align:left;font-size:12px;font-weight:750}
+.staff-gate-panel input{height:49px;font-size:20px;text-align:center;letter-spacing:.3em;border-radius:12px;background:#f8faf9;border:1px solid #d9e5dc}
+.pin-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:3px 0 6px}
+.pin-pad button{min-height:51px;border-radius:11px;border:1px solid #e2eae5;background:#fff;color:#2d493b;font-weight:750;font-size:20px;transition:background .12s,transform .12s}
+.pin-pad button:active{background:#e4f0e9;transform:scale(.97)}.pin-pad button[data-pin="clear"],.pin-pad button[data-pin="back"]{font-size:13px;background:#f4f7f5}
+.staff-gate-panel #staff-gate-submit{font-size:14px;min-height:46px}.staff-gate-panel .small-link{margin-top:4px}
+@media(max-width:460px){.staff-gate{padding:12px}.staff-gate-panel{padding:25px 21px;border-radius:17px}.pin-pad button{min-height:48px}}
 
-/* 車卡圖片位置與大小控制 */
-.image-wrap {
-  --photo-y: 0px;
-  position: relative;
-  overflow: hidden !important;
-}
-
-.image-wrap img {
-  position: absolute !important;
-  inset: auto !important;
-
-  left: 0 !important;
-  top: calc(50% + var(--photo-y)) !important;
-
-  width: 100% !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
-
-  transform: translateY(-50%) !important;
-  display: block !important;
-}
+/* V4.0: consistent branded printing */
+.staff-print-head{display:flex;align-items:center;gap:12px;padding-bottom:13px;margin-bottom:14px;border-bottom:2px solid #236647;break-after:avoid}
+.staff-print-logo{background:#226747;color:#fff;border-radius:10px;width:44px;height:44px;display:grid;place-items:center;font-size:25px}.staff-print-head small{font-size:9px;color:#7a8d80;letter-spacing:1.3px}.staff-print-head h1{font-size:22px;margin:2px 0}.staff-print-head p{font-size:11px;margin:0;color:#63796b}.staff-print-head>span{font-size:10px;color:#667b70;margin-left:auto}.staff-print-foot{margin-top:18px;border-top:1px solid #d7e4db;padding-top:9px;font-size:10px;color:#7a877f}
+/* Adjustable image position by changing only --photo-y; photo width always fills the available frame. */
+.image-wrap{--photo-y:0px;overflow:hidden;position:relative}
+.image-wrap img{position:absolute!important;inset:auto!important;left:0!important;top:calc(50% + var(--photo-y))!important;width:100%!important;height:auto!important;max-width:none!important;max-height:none!important;transform:translateY(-50%)!important;object-fit:unset!important}
+@media print{.staff-print-head,.staff-print-foot{-webkit-print-color-adjust:exact;print-color-adjust:exact}.print-card img{object-fit:contain!important}.print-intro{display:none}}

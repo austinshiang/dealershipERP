@@ -105,7 +105,7 @@
       throw new Error('尚未設定員工端入口密碼，請管理員在 Google 後台設定並發布車源。');
     return (await sha256Hex(String(gate.salt)+':'+password))===gate.verifier;
   }
-  async function gateLogin(e){e.preventDefault();const p=$('staff-gate-pass').value;if(!p){showGateMessage('請輸入入口密碼',true);return;}
+  async function gateLogin(e){e.preventDefault();const p=$('staff-gate-pass').value;if(!/^\d+$/.test(p)){showGateMessage('請輸入純數字密碼',true);return;}
     const b=$('staff-gate-submit');b.disabled=true;showGateMessage('正在驗證已發布的入口密碼…',false);
     try{const doc=await getStaffDoc();if(!await verifyGate(doc,p))throw new Error('密碼錯誤，請向管理員確認。');
       $('staff-gate-pass').value='';$('staff-gate').classList.add('hidden');$('staff-app').classList.remove('hidden');
@@ -176,10 +176,10 @@
     $('loan-details').textContent='本金 NT$ '+Math.round(amount).toLocaleString('zh-TW')+' · 總利息 NT$ '+Math.round(Math.max(0,monthly*months-amount)).toLocaleString('zh-TW');
   }
   function printList(){const cars=st.shown; if(!cars.length){alert('沒有可以列印的車輛');return;}
-    const pages='<div class="print-intro"><strong>車源清單</strong> · 列印時間 '+safe(new Date().toLocaleString('zh-TW'))+' · 符合 '+cars.length+' 台車</div>'+
+    const pages='<div class="staff-print-head"><div class="staff-print-logo">▰</div><div><small>DEALERSHIP INVENTORY REPORT</small><h1>'+safe(String(cfg.BRAND||'車行 ERP'))+'｜車源清單</h1><p>唯讀車源 · 已發布資料 · '+safe(cars.length)+' 台</p></div><span>'+safe(new Date().toLocaleString('zh-TW'))+'</span></div>'+
     '<div class="print-cards">'+cars.map(c=>'<div class="print-card '+(isSold(c)?'sold':'')+'">'+(
       images(c).length?'<img src="'+safe(images(c)[0])+'" alt="車輛照片">':'')+
-      '<h4>'+safe([c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' '))+'</h4><p>'+safe(c['販售狀態'])+' / '+safe(c['售賣形式'])+' / '+safe(c['在庫位子'])+'</p><p>'+safe(mileage(c))+' · '+safe(ageLabel(c))+'</p><strong>'+safe(format(carPrice(c)))+' 萬</strong></div>').join('')+'</div>';
+      '<h4>'+safe([c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' '))+'</h4><p>'+safe(c['販售狀態'])+' / '+safe(c['售賣形式'])+' / '+safe(c['在庫位子'])+'</p><p>'+safe(mileage(c))+' · '+safe(ageLabel(c))+'</p><strong>'+safe(format(carPrice(c)))+' 萬</strong></div>').join('')+'</div><div class="staff-print-foot">員工查車報表 · 價格及狀態以最新 Google 管理後台為準 · 列印日 '+safe(new Date().toLocaleDateString('zh-TW'))+'</div>';
     $('print-sheet').innerHTML=pages;window.print();
   }
   const adminURL=String(cfg.ADMIN_URL||'');const admin=$('staff-admin-link');const gateAdmin=$('gate-admin-link');
@@ -190,6 +190,14 @@
   $('search').addEventListener('input',render);$('sort').addEventListener('change',render);for(const [id,[_field,label]] of Object.entries(filterDefs))$('filter-'+id).addEventListener('change',()=>{updateFacetLabel(id,label);render();});$('filters-clear').addEventListener('click',()=>{document.querySelectorAll('.multi-menu input[type=checkbox]').forEach(c=>c.checked=false);for(const [id,[_field,label]] of Object.entries(filterDefs))updateFacetLabel(id,label);render();});
   $('refresh').addEventListener('click',()=>load());
   $('staff-gate-form').addEventListener('submit',gateLogin);
+  $('staff-gate-pass').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,128);});
+  $('staff-pin-pad').addEventListener('click',e=>{
+    const b=e.target.closest('[data-pin]');if(!b)return;
+    const box=$('staff-gate-pass'),v=b.dataset.pin;
+    if(v==='clear')box.value='';else if(v==='back')box.value=box.value.slice(0,-1);
+    else if(box.value.length<128)box.value+=v;
+    box.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   $('staff-logout').addEventListener('click',()=>{st.cars=[];st.shown=[];st.staffDoc=null;$('car-grid').innerHTML='';$('staff-app').classList.add('hidden');$('staff-gate').classList.remove('hidden');showGateMessage('已離開唯讀模式，請重新輸入入口密碼。',false);});
   $('tools-open').addEventListener('click',()=>$('tools-modal').classList.remove('hidden'));
   $('tools-close').addEventListener('click',()=>$('tools-modal').classList.add('hidden'));
