@@ -191,9 +191,9 @@
   function printList(){const cars=st.shown; if(!cars.length){alert('沒有可以列印的車輛');return;}
     const pages='<div class="staff-print-head"><div class="staff-print-logo">▰</div><div><small>DEALERSHIP INVENTORY REPORT</small><h1>'+safe(String(cfg.BRAND||'車行 ERP'))+'｜車源清單</h1><p>唯讀車源 · 已發布資料 · '+safe(cars.length)+' 台</p></div><span>'+safe(new Date().toLocaleString('zh-TW'))+'</span></div>'+
     '<div class="print-cards">'+cars.map(c=>'<div class="print-card '+(isSold(c)?'sold':'')+'">'+(
-      images(c).length?'<img src="'+safe(images(c)[0])+'" alt="車輛照片">':'')+
+      images(c).length?'<div class="print-photo"><img src="'+safe(images(c)[0])+'" alt="車輛照片"></div>':'<div class="print-photo print-photo-empty">尚無照片</div>')+
       '<h4>'+safe([c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' '))+'</h4><p>'+safe(c['販售狀態'])+' / '+safe(c['售賣形式'])+' / '+safe(c['在庫位子'])+'</p><p>'+safe(mileage(c))+' · '+safe(ageLabel(c))+'</p><strong>'+safe(format(carPrice(c)))+' 萬</strong></div>').join('')+'</div><div class="staff-print-foot">員工查車報表 · 價格及狀態以最新 Google 管理後台為準 · 列印日 '+safe(new Date().toLocaleDateString('zh-TW'))+'</div>';
-    $('print-sheet').innerHTML=pages;window.print();
+    $('print-sheet').innerHTML=pages;Promise.race([Promise.all([...$('print-sheet').querySelectorAll('img')].map(im=>im.complete?Promise.resolve():new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true});}))),new Promise(resolve=>setTimeout(resolve,2400))]).then(()=>window.print());
   }
   const adminURL=String(cfg.ADMIN_URL||'');const admin=$('staff-admin-link');const gateAdmin=$('gate-admin-link');
   if(/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/.test(adminURL)){
