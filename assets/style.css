@@ -64,7 +64,7 @@ body{background:#fff}
 
 /* 車卡圖片位置與大小控制 */
 .image-wrap {
-  --photo-y: 0px;
+  --photo-y: 200px;
   position: relative;
   overflow: hidden !important;
 }
@@ -81,6 +81,6 @@ body{background:#fff}
   max-width: none !important;
   max-height: none !important;
 
-  transform: translateY(-30%) !important;
+  transform: translateY(-50%) !important;
   display: block !important;
 }
