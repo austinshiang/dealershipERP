@@ -81,6 +81,6 @@ body{background:#fff}
   max-width: none !important;
   max-height: none !important;
 
-  transform: translateY(-50%) !important;
+  transform: translateY(0%) !important;
   display: block !important;
 }
