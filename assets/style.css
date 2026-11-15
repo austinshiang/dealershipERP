@@ -74,13 +74,13 @@ body{background:#fff}
   inset: auto !important;
 
   left: 0 !important;
-  top: calc(50% + var(--photo-y)) !important;
+  top: calc(150% + var(--photo-y)) !important;
 
   width: 100% !important;
   height: auto !important;
   max-width: none !important;
   max-height: none !important;
 
-  transform: translateY(0%) !important;
+  transform: translateY(-30%) !important;
   display: block !important;
 }
