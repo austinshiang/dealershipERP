@@ -61,9 +61,10 @@ body{background:#fff}
 @media print{.cars-grid{display:none!important}}
 
 
-/* 車卡圖片位置調整 */
+
+/* 車卡圖片位置與大小控制 */
 .image-wrap {
-  --photo-y: 200px; /* 圖片上下位置，可自行調整 */
+  --photo-y: 30px;
   position: relative;
   overflow: hidden !important;
 }
@@ -71,15 +72,15 @@ body{background:#fff}
 .image-wrap img {
   position: absolute !important;
   inset: auto !important;
+
   left: 0 !important;
-  top: var(--photo-y) !important;
+  top: calc(50% + var(--photo-y)) !important;
 
   width: 100% !important;
   height: auto !important;
   max-width: none !important;
   max-height: none !important;
 
-  transform: none !important;
-  object-fit: unset !important;
+  transform: translateY(-50%) !important;
   display: block !important;
 }
