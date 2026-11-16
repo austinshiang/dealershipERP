@@ -2,7 +2,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173c31"><meta name="description" content="車行 ERP 唯讀車源與貸款試算">
 <title>車行 ERP｜員工查車</title><link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="stylesheet" href="assets/style.css?v=4.3.0"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><script defer src="site-config.js"></script><script defer src="assets/staff.js?v=4.3.0"></script>
+<link rel="stylesheet" href="assets/style.css?v=4.5"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><script defer src="site-config.js"></script><script defer src="assets/staff.js?v=4.5"></script>
 <script>
 window.addEventListener('error', function(ev) {
   var msg=document.getElementById('message'), count=document.getElementById('result-count');
@@ -58,10 +58,10 @@ window.addEventListener('load', function(){
     <div class="field"><span>售賣形式（可複選）</span><details class="multi-select"><summary id="filter-label-sale-type">售賣形式 · 全部</summary><div class="multi-menu" id="filter-sale-type"></div></details></div>
     <label class="field"><span>排序</span><select id="sort"><option value="newest">最新購入</option><option value="age">在庫最久</option><option value="price-asc">價格低到高</option><option value="price-desc">價格高到低</option><option value="km">里程低到高</option></select></label>
    </div>
-   <div class="toolbar-bottom"><div><button class="btn-lite" id="filters-clear" type="button">清除篩選</button> <strong id="result-count">載入中…</strong><span id="published-at" class="small-muted"></span></div><div class="toolbar-buttons"><button class="btn-lite" id="refresh">↻ 重新讀取</button><button class="btn-lite" id="loan-open">貸款試算</button><button class="btn-lite" id="tools-open">常用工具</button><button class="btn-primary" id="print-open">列印清單</button></div></div>
+   <div class="toolbar-bottom"><div><button class="btn-lite" id="filters-clear" type="button">清除篩選</button> <strong id="result-count">載入中…</strong><span id="published-at" class="small-muted"></span></div><div class="toolbar-buttons"><button class="btn-lite" id="refresh">↻ 重新讀取</button><button class="btn-lite" id="loan-open">貸款試算</button><button class="btn-lite" id="tools-open">常用工具</button><label class="erp45-staff-layout" for="staff-grid-layout">每排 <select id="staff-grid-layout" aria-label="車源每排台數"><option value="1">1 台</option><option value="2" selected>2 台</option><option value="4">4 台</option></select></label><button class="btn-primary" id="print-open">列印清單</button></div></div>
   </section>
   <section aria-label="車源清單"><div class="section-title"><h2>車輛列表</h2><span id="selection-count" class="small-muted"></span></div><div id="message" class="message-box" role="status">正在讀取最新車源…</div><div id="car-grid" class="cars-grid"></div></section>
-  <footer class="staff-footer">ERP V4.3 · GitHub Pages 唯讀車源。資料可能有發布延遲。</footer>
+  <footer class="staff-footer">ERP V4.5 · GitHub Pages 唯讀車源。資料可能有發布延遲。</footer>
 </main></div>
 <div class="overlay hidden" id="car-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="detail-dialog"><div class="dialog-bar"><div><span class="eyebrow">VEHICLE DETAILS</span><h2 id="modal-title">車輛詳情</h2></div><button class="icon-button" id="modal-close" aria-label="關閉詳情">×</button></div><div class="detail-body" id="modal-body"></div></div></div>
 <div class="overlay hidden" id="loan-modal" role="dialog" aria-modal="true" aria-labelledby="loan-title"><div class="small-dialog"><div class="dialog-bar"><h2 id="loan-title">車貸試算機</h2><button class="icon-button" id="loan-close" aria-label="關閉貸款試算">×</button></div><p class="small-muted">本息平均攤還示意，未包含手續費、動保費及其他費用。</p><div class="loan-fields"><label>車價（萬元）<input id="loan-price" type="number" min="0" value="100" step="0.1"></label><label>頭期款（萬元）<input id="loan-down" type="number" min="0" value="20" step="0.1"></label><label>年利率（%）<input id="loan-rate" type="number" min="0" value="4" step="0.1"></label><label>期數（月）<select id="loan-months"><option value="24">24</option><option value="36">36</option><option value="48">48</option><option value="60" selected>60</option><option value="72">72</option><option value="84">84</option></select></label></div><div class="loan-result"><span>預估每月繳款</span><strong id="loan-monthly">—</strong><small id="loan-details"></small></div><p id="loan-error" class="error-line" role="status"></p></div></div>
@@ -74,5 +74,6 @@ window.addEventListener('load', function(){
 <p><a class="btn-lite" target="_blank" rel="noopener noreferrer" href="https://www.etax.nat.gov.tw/">財政部稅務入口網 ↗</a></p>
 <p><a class="btn-lite" target="_blank" rel="noopener noreferrer" href="https://www.mvdis.gov.tw/">監理服務網 ↗</a></p>
 </div></div>
+<div id="staff-print-modal" class="overlay hidden erp45-print-overlay" role="dialog" aria-modal="true" aria-labelledby="staff-print-title"><div class="erp45-print-dialog"><div class="erp45-print-dialog-head"><div><h2 id="staff-print-title">A4 紙本方磚列印設定</h2><p>自訂篩選條件，以一排 5 台方磚樣式輸出至 A4 紙張</p></div><button id="staff-print-close" type="button" aria-label="關閉列印設定">×</button></div><div class="erp45-print-dialog-body" id="staff-print-options"></div><div class="erp45-print-dialog-foot"><span id="staff-print-count"></span><div><button id="staff-print-cancel" type="button" class="btn-lite">取消關閉</button><button id="staff-print-run" type="button" class="btn-primary">▣ 確認列印（A4 五欄）</button></div></div></div></div>
 <div id="print-sheet" class="print-sheet"></div>
 </body></html>
