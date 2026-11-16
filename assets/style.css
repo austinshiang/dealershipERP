@@ -133,3 +133,55 @@ body{background:#fff}
 @media(max-width:600px){.staff-home{height:216px}.staff-home-overlay{padding:28px 18px 14px}.staff-home-overlay strong{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.staff-notice-clip span{animation:none;padding-left:0;white-space:normal}}
 @media print{.staff-notice,.staff-home,.staff-inventory-overview{display:none!important}}
+
+/* V4.5 layout control: default two cars per row */
+.erp45-staff-layout{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;font-weight:800;color:#557066}
+.erp45-staff-layout select{width:76px;height:35px;border:1px solid #d3e4da;border-radius:8px;background:#fff;color:#275a44;padding:0 6px}
+.cars-grid.erp45-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))!important}
+.cars-grid.erp45-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.cars-grid.erp45-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.cars-grid.erp45-cols-4 .car-card{flex-direction:column!important;min-height:285px}
+.cars-grid.erp45-cols-4 .image-wrap{width:100%!important;flex:0 0 auto!important;min-height:160px!important;height:160px!important}
+.cars-grid.erp45-cols-4 .card-info{padding:11px}
+.cars-grid.erp45-cols-4 .price-row strong{font-size:23px}
+.cars-grid.erp45-cols-4 .card-specs{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:1000px){.cars-grid.erp45-cols-4{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:720px){.cars-grid.erp45-cols-2,.cars-grid.erp45-cols-4{grid-template-columns:1fr!important}}
+/* V4.5 popup matches admin's A4 print options */
+.erp45-print-overlay{z-index:180;padding:12px;align-items:center}
+.erp45-print-dialog{width:min(100%,620px);max-height:94dvh;display:flex;flex-direction:column;border-radius:18px;overflow:hidden;background:white;box-shadow:0 30px 100px rgba(0,0,0,.24)}
+.erp45-print-dialog-head{background:#f6f8fa;padding:18px 22px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid #e6ebef}
+.erp45-print-dialog-head h2{margin:0;font-size:20px;color:#203a4b}.erp45-print-dialog-head p{margin:6px 0 0;font-size:12px;color:#8696a6}
+.erp45-print-dialog-head button{border:1px solid #e4eaf0;background:white;width:34px;height:34px;border-radius:50%;font-size:24px;color:#8195a4;cursor:pointer}
+.erp45-print-dialog-body{padding:13px 21px;overflow-y:auto}
+.erp45-print-group{padding:13px 0;border-bottom:1px solid #e7edf0}
+.erp45-print-title{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#394d63;gap:7px;margin-bottom:10px}
+.erp45-print-title span,.erp45-print-title button{font-size:11px;color:#159a78}.erp45-print-title button{background:none;border:0;cursor:pointer;font-weight:850;padding:3px}
+.erp45-print-checks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.erp45-print-check{display:flex;align-items:center;gap:7px;border:1px solid #dce5ea;background:#f8fbfd;padding:9px;border-radius:9px;font-size:11px;color:#34495f;cursor:pointer}
+.erp45-print-check input{accent-color:#149c77}
+.erp45-print-checks.erp45-scroll{max-height:185px;overflow-y:auto;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #e3e8ee;border-radius:11px;padding:10px}
+.erp45-print-dialog-foot{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid #e6eaf0;gap:10px;flex-wrap:wrap}
+.erp45-print-dialog-foot #staff-print-count{font-size:12px;color:#4b7561;font-weight:800}
+.erp45-print-dialog-foot>div{display:flex;gap:8px}
+@media(max-width:550px){.erp45-print-checks,.erp45-print-checks.erp45-scroll{grid-template-columns:repeat(2,minmax(0,1fr))}.erp45-print-dialog-head h2{font-size:17px}.erp45-print-dialog-body{padding:8px 12px}}
+/* Printed inventory only; do not modify the screen cards */
+@page{size:A4 portrait;margin:8mm}
+@media print{
+ .print-sheet{display:block!important}
+ .staff-print-head{padding:0 0 2mm;margin:0 0 2mm;border-bottom:1.5pt solid #1e7652}
+ .staff-print-head .staff-print-logo{width:11mm;height:11mm;border-radius:2mm;font-size:17pt}
+ .staff-print-head h1{font-size:14pt!important;margin:1mm 0!important}
+ .staff-print-head p{font-size:7pt!important;margin:0!important}
+ .print-cards.erp45-print-5{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2mm!important}
+ .print-cards.erp45-print-5 .print-card{break-inside:avoid!important;page-break-inside:avoid!important;display:flex!important;flex-direction:column!important;border:.45pt solid #cbd6d0!important;border-radius:1.5mm!important;overflow:hidden!important;padding:0!important;background:white!important}
+ .print-cards.erp45-print-5 .print-photo{width:100%!important;height:25mm!important;background:#f3f5f3}
+ .print-cards.erp45-print-5 .print-photo img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 45%!important}
+ .erp45-print-card-body{padding:1.25mm!important;display:flex;flex:1;flex-direction:column}
+ .erp45-print-card-body h4{padding:0!important;margin:0!important;min-height:10mm!important;font-size:7pt!important;line-height:1.22}
+ .erp45-print-card-body h4 small{display:block;font-size:5.8pt;margin-bottom:.5mm}
+ .erp45-print-card-body p{padding:0!important;margin:.6mm 0!important;font-size:5.7pt!important;line-height:1.25}
+ .erp45-print-card-body strong{margin-top:auto!important;padding:.8mm 0 .2mm!important;text-align:right;font-size:14.5pt!important;color:#c72135!important;background:transparent!important;line-height:1.1}
+ .erp45-print-card-body strong small{font-size:6pt}
+ .print-sheet .staff-print-foot{display:none}
+}

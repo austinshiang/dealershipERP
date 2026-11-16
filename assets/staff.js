@@ -2,7 +2,7 @@
 (function(){
   const $=id=>document.getElementById(id);
   const cfg=window.ERP_SITE||{};
-  const st={cars:[],shown:[],selected:new Set(),car:null,images:[],photo:0,loading:false,staffDoc:null,homeBanners:[],homeIndex:0,homeTimer:null};
+  const st={cars:[],shown:[],selected:new Set(),car:null,images:[],photo:0,loading:false,staffDoc:null,homeBanners:[],homeIndex:0,homeTimer:null,staffCols:2};
   const safe=v=>String(v===null||v===undefined?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const n=v=>Number(v)||0;
   const val=id=>$(id)?$(id).value:'';
@@ -91,7 +91,7 @@
     $('count-stock').textContent=st.cars.filter(c=>!isSold(c)).length;
     $('count-reserved').textContent=st.cars.filter(c=>c['販售狀態']==='收訂').length;
     $('count-incoming').textContent=st.cars.filter(c=>c['販售狀態']==='即將到港').length;
-    $('car-grid').innerHTML=st.shown.map(card).join('');
+    $('car-grid').classList.remove('erp45-cols-1','erp45-cols-2','erp45-cols-4');$('car-grid').classList.add('erp45-cols-'+st.staffCols);$('car-grid').innerHTML=st.shown.map(card).join('');
     const m=$('message');m.classList.toggle('hidden',st.shown.length>0);
     if(!st.shown.length&&!st.loading){m.textContent=st.cars.length?'目前沒有符合篩選條件的車輛。':'尚未發布車源，請管理員在 Google 後台按「發布員工車源」。';}
   }
@@ -128,7 +128,7 @@
   function showHomeV43(){const list=st.homeBanners,root=$('staff-home-photo');if(!root)return;
     if(!list.length){root.innerHTML='<div class="staff-home-empty">DEALERSHIP · VEHICLE SHOWCASE</div>';$('staff-home-counter').textContent='尚無首頁輪播圖';$('staff-home-dots').innerHTML='';return;}
     st.homeIndex=((st.homeIndex%list.length)+list.length)%list.length;
-    root.innerHTML='<img src="'+safe(list[st.homeIndex])+'" alt="首頁輪播 '+(st.homeIndex+1)+'" loading="eager">';
+    root.innerHTML='<img src="'+safe(list[st.homeIndex])+'" alt="首頁輪播 '+(st.homeIndex+1)+'" loading="eager">';const photo=root.querySelector('img');photo.addEventListener('error',()=>{root.innerHTML='<div class="staff-home-empty">首頁圖片讀取失敗，請確認 Google Drive 連結共用權限</div>';});
     $('staff-home-counter').textContent=(st.homeIndex+1)+' / '+list.length;
     $('staff-home-dots').innerHTML=list.map((_,i)=>'<button data-staff-dot="'+i+'" type="button" class="'+(i===st.homeIndex?'selected':'')+'" aria-label="第 '+(i+1)+' 張"></button>').join('');
   }
@@ -197,12 +197,27 @@
     $('loan-error').textContent='';$('loan-monthly').textContent='NT$ '+Math.round(monthly).toLocaleString('zh-TW');
     $('loan-details').textContent='本金 NT$ '+Math.round(amount).toLocaleString('zh-TW')+' · 總利息 NT$ '+Math.round(Math.max(0,monthly*months-amount)).toLocaleString('zh-TW');
   }
-  function printList(){const cars=st.shown; if(!cars.length){alert('沒有可以列印的車輛');return;}
-    const pages='<div class="staff-print-head"><div class="staff-print-logo">▰</div><div><small>DEALERSHIP INVENTORY REPORT</small><h1>'+safe(String(cfg.BRAND||'車行 ERP'))+'｜車源清單</h1><p>唯讀車源 · 已發布資料 · '+safe(cars.length)+' 台</p></div><span>'+safe(new Date().toLocaleString('zh-TW'))+'</span></div>'+
-    '<div class="print-cards">'+cars.map(c=>'<div class="print-card '+(isSold(c)?'sold':'')+'">'+(
+  const printFieldsV45={status:{label:'車輛狀態／售出與否',key:'販售狀態',options:['在庫','收訂','即將到港','售出']},sale:{label:'售賣形式',key:'售賣形式',options:['零售','寄賣']},brand:{label:'廠牌篩選',key:'廠牌'},location:{label:'在庫位置',key:'在庫位子'}};
+  let printSelectedV45=null;
+  function setupPrintOptionsV45(){
+    const all=st.cars;
+    for(const spec of Object.values(printFieldsV45))if(!spec.options||spec.key==='廠牌'||spec.key==='在庫位子')spec.options=[...new Set(all.map(c=>String(c[spec.key]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+    printSelectedV45={};for(const [k,v] of Object.entries(printFieldsV45))printSelectedV45[k]=new Set(v.options.filter(opt=>k!=='status'||opt!=='售出'));
+    const html=Object.entries(printFieldsV45).map(([kind,spec])=>'<section class="erp45-print-group"><div class="erp45-print-title"><strong>'+safe(spec.label)+'</strong><span><button type="button" data-print-all="'+kind+'">全選</button> / <button type="button" data-print-none="'+kind+'">全取消</button></span></div><div class="erp45-print-checks '+(kind==='brand'||kind==='location'?'erp45-scroll':'')+'">'+spec.options.map(v=>'<label class="erp45-print-check"><input type="checkbox" data-print-kind="'+kind+'" value="'+safe(v)+'" '+(printSelectedV45[kind].has(v)?'checked':'')+'> '+safe(v)+'</label>').join('')+'</div></section>').join('');
+    $('staff-print-options').innerHTML=html;
+    updatePrintCountV45();
+  }
+  function selectedPrintCarsV45(){return st.cars.filter(c=>Object.entries(printFieldsV45).every(([k,v])=>printSelectedV45[k]?.has(String(c[v.key]||(k==='sale'?'零售':k==='status'?'在庫':'')))));}
+  function updatePrintCountV45(){const count=selectedPrintCarsV45().length;$('staff-print-count').textContent='符合 '+count+' 台車 · A4 直式';$('staff-print-run').disabled=count===0;}
+  function openPrintDialogV45(){setupPrintOptionsV45();$('staff-print-modal').classList.remove('hidden');}
+  function closePrintDialogV45(){$('staff-print-modal').classList.add('hidden');}
+  function printList(){const cars=selectedPrintCarsV45(); if(!cars.length){alert('沒有可以列印的車輛');return;}
+    const pages='<div class="staff-print-head"><div class="staff-print-logo">▰</div><div><small>DEALERSHIP INVENTORY REPORT</small><h1>'+safe(String(cfg.BRAND||'車行 ERP'))+'｜'+(new Date().getMonth()+1)+'月 在庫車輛總表</h1><p>A4 直式 · 每排 5 台 · 符合 '+cars.length+' 台</p></div><span>'+safe(new Date().toLocaleDateString('zh-TW'))+'</span></div>'+
+    '<div class="print-cards erp45-print-5">'+cars.map(c=>'<div class="print-card '+(isSold(c)?'sold':'')+'">'+(
       images(c).length?'<div class="print-photo"><img src="'+safe(images(c)[0])+'" alt="車輛照片"></div>':'<div class="print-photo print-photo-empty">尚無照片</div>')+
-      '<h4>'+safe([c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' '))+'</h4><p>'+safe(c['販售狀態'])+' / '+safe(c['售賣形式'])+' / '+safe(c['在庫位子'])+'</p><p>'+safe(mileage(c))+' · '+safe(ageLabel(c))+'</p><strong>'+safe(format(carPrice(c)))+' 萬</strong></div>').join('')+'</div><div class="staff-print-foot">員工查車報表 · 價格及狀態以最新 Google 管理後台為準 · 列印日 '+safe(new Date().toLocaleDateString('zh-TW'))+'</div>';
-    $('print-sheet').innerHTML=pages;Promise.race([Promise.all([...$('print-sheet').querySelectorAll('img')].map(im=>im.complete?Promise.resolve():new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true});}))),new Promise(resolve=>setTimeout(resolve,2400))]).then(()=>window.print());
+      '<div class="erp45-print-card-body"><h4><small>'+safe(c['廠牌'])+'</small>'+safe([c['年份'],c['型號']].filter(Boolean).join(' '))+'</h4><p>'+safe(c['年份']||'—')+' 年 · '+safe(mileage(c))+'</p><p>'+safe(c['在庫位子']||'—')+' · '+safe(c['販售狀態']||'在庫')+' · '+safe(c['售賣形式']||'零售')+'</p><strong>'+safe(format(carPrice(c)))+'<small> 萬</small></strong></div></div>').join('')+'</div>';
+    $('print-sheet').innerHTML=pages;closePrintDialogV45();
+    Promise.race([Promise.all([...$('print-sheet').querySelectorAll('img')].map(im=>im.complete?Promise.resolve():new Promise(resolve=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',resolve,{once:true});}))),new Promise(resolve=>setTimeout(resolve,2800))]).then(()=>window.print());
   }
   const adminURL=String(cfg.ADMIN_URL||'');const admin=$('staff-admin-link');const gateAdmin=$('gate-admin-link');
   if(/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/.test(adminURL)){
@@ -234,8 +249,15 @@
   $('loan-open').addEventListener('click',()=>{$('loan-modal').classList.remove('hidden');calcLoan();});
   $('loan-close').addEventListener('click',()=>$('loan-modal').classList.add('hidden'));
   for(const id of ['loan-price','loan-down','loan-rate','loan-months'])$(id).addEventListener('input',calcLoan);
-  $('print-open').addEventListener('click',printList);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLightbox();$('loan-modal').classList.add('hidden');$('tools-modal').classList.add('hidden');closeCar();}
+  $('print-open').addEventListener('click',openPrintDialogV45);
+  $('staff-grid-layout').addEventListener('change',e=>{st.staffCols=[1,2,4].includes(Number(e.target.value))?Number(e.target.value):2;render();});
+  $('staff-print-close').addEventListener('click',closePrintDialogV45);
+  $('staff-print-cancel').addEventListener('click',closePrintDialogV45);
+  $('staff-print-modal').addEventListener('click',e=>{if(e.target===$('staff-print-modal'))closePrintDialogV45();});
+  $('staff-print-run').addEventListener('click',printList);
+  $('staff-print-options').addEventListener('change',e=>{const el=e.target.closest('input[data-print-kind]');if(!el)return;const v=printSelectedV45[el.dataset.printKind];if(el.checked)v.add(el.value);else v.delete(el.value);updatePrintCountV45();});
+  $('staff-print-options').addEventListener('click',e=>{const b=e.target.closest('[data-print-all],[data-print-none]');if(!b)return;const kind=b.dataset.printAll||b.dataset.printNone;printSelectedV45[kind]=new Set(b.dataset.printAll===undefined?[]:printFieldsV45[kind].options);$('staff-print-options').querySelectorAll('input[data-print-kind="'+kind+'"]').forEach(el=>el.checked=printSelectedV45[kind].has(el.value));updatePrintCountV45();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePrintDialogV45();closeLightbox();$('loan-modal').classList.add('hidden');$('tools-modal').classList.add('hidden');closeCar();}
     if(!$('lightbox').classList.contains('hidden')){if(e.key==='ArrowLeft')movePhoto(-1);if(e.key==='ArrowRight')movePhoto(1);}});
   showGateMessage('請輸入員工端密碼；若尚未設定，請管理員先到 Google 後台設定並發布。',false);
 })();
