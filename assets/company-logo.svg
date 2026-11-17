@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-labelledby="title"><title id="title">車行 ERP</title><rect width="160" height="160" rx="38" fill="#164e3d"/><path d="M40 58h90l-15 44H28z" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-labelledby="logo-title">
+<title id="logo-title">車行 ERP 車源管理</title>
+<rect width="160" height="160" rx="36" fill="#155440"/>
+<path d="M30 99h100v10H30z" fill="#7bc5a1" opacity=".7"/>
+<path d="M33 87l12-24c3-7 10-11 18-11h42c7 0 14 4 18 11l12 24v19h-14v-10H47v10H33z" fill="#fff"/>
+<path d="M53 68h54l7 13H46z" fill="#155440"/>
+<circle cx="53" cy="103" r="10" fill="#0d3c2d" stroke="#fff" stroke-width="4"/>
+<circle cx="112" cy="103" r="10" fill="#0d3c2d" stroke="#fff" stroke-width="4"/>
+<path d="M24 121h112" stroke="#9ed5b8" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+</svg>
