@@ -11,6 +11,9 @@
   function imageURL(s){s=safeURL(s);if(!s)return '';const m=s.match(/(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=|[?&]id=)([\w-]+)/);return m?'https://drive.google.com/thumbnail?id='+encodeURIComponent(m[1])+'&sz=w1200':s;}
   function images(c){return Array.from(new Set([c['封面圖片'],...String(c['其他照片']||'').split(/[\n,;|\t ]+/)].map(imageURL).filter(Boolean)));}
   function showPhoto(c){const list=images(c);return list.length?'<img loading="lazy" src="'+safe(list[0])+'" alt="'+safe(c['廠牌']+' '+c['型號'])+'">':'<span class="no-photo">目前尚無照片</span>';}
+  function taiwanNowPartsV48(){return Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit'}).formatToParts(new Date()).map(p=>[p.type,p.value]));}
+  function dateMonthV48(v){const m=String(v||'').match(/^(\d{4})[/-](\d{1,2})/);return m?m[1]+'-'+m[2].padStart(2,'0'):'';}
+  function thisMonthV48(){const n=taiwanNowPartsV48();return n.year+'-'+n.month;}
   function dayValue(value){if(!value)return null;const m=String(value).match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3]);return isNaN(d.getTime())?null:d;}
   function carDays(c){const from=dayValue(c['購入日期']);if(!from)return null;const to=c['販售狀態']==='售出'?dayValue(c['成交日期']):new Date();if(!to)return null;return Math.max(0,Math.floor((to.getTime()-from.getTime())/86400000));}
   function ageLabel(c){const days=carDays(c);return days===null?'未提供日期':c['販售狀態']==='售出'?'銷售期 '+days+' 天':'在庫 '+days+' 天';}
@@ -32,7 +35,7 @@
   }
   function soldDate(c){return String(c['成交日期']||'').trim()||'未登錄';}
   const isSold=c=>c['販售狀態']==='售出';
-  function unique(field){return [...new Set(st.cars.map(c=>String(c[field]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW'));}
+  function unique(field){const includeSold=selectedFor('status').includes('售出');return [...new Set(st.cars.filter(c=>includeSold||!isSold(c)).map(c=>String(c[field]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW'));}
   const filterDefs={brand:['廠牌','廠牌'],location:['在庫位子','在庫位子'],status:['販售狀態','車輛狀態'],'sale-type':['售賣形式','售賣形式']};
   function selectedFor(id){return Array.from(document.querySelectorAll('#filter-'+id+' input[type="checkbox"]:checked')).map(x=>x.value);}
   function rebuildOptions(){
@@ -40,7 +43,7 @@
       const host=$('filter-'+id);if(!host)continue;
       const previous=host.dataset.initialized?selectedFor(id):id==='status'?['在庫','收訂','即將到港']:[];
       const vals=id==='status'?['在庫','收訂','即將到港','售出']:id==='sale-type'?['零售','寄賣']:unique(field);
-      const all=vals.map(v=>'<label class="multi-option"><input type="checkbox" value="'+safe(v)+'" '+(previous.includes(v)?'checked':'')+'><span>'+safe(v)+'</span><small>'+st.cars.filter(c=>(c[field]|| (id==='status'?'在庫':'零售'))===v).length+'</small></label>').join('');
+      const all=vals.map(v=>'<label class="multi-option"><input type="checkbox" value="'+safe(v)+'" '+(previous.includes(v)?'checked':'')+'><span>'+safe(v)+'</span><small>'+st.cars.filter(c=>(id==='status'&&v==='售出'?isSold(c):(selectedFor('status').includes('售出')||!isSold(c))&&(c[field]|| (id==='status'?'在庫':'零售'))===v)).length+'</small></label>').join('');
       host.innerHTML=all||'<span class="small-muted">沒有可選項目</span>';host.dataset.initialized='1';
       updateFacetLabel(id,label);
     }
@@ -48,11 +51,15 @@
   function updateFacetLabel(id,label){const checked=selectedFor(id);const out=$('filter-label-'+id);if(out)out.textContent=checked.length?label+' · 已選 '+checked.length:label+' · 全部';}
   function filtered(){const q=val('search').trim().toLowerCase();
     const brands=selectedFor('brand'),locations=selectedFor('location'),statuses=selectedFor('status'),forms=selectedFor('sale-type');
+    const rawMin=val('price-min'),rawMax=val('price-max'),min=rawMin===''?null:Number(rawMin),max=rawMax===''?null:Number(rawMax);
+    if((min!==null&&(!Number.isFinite(min)||min<0))||(max!==null&&(!Number.isFinite(max)||max<0))||(min!==null&&max!==null&&min>max))return [];
     const arr=st.cars.filter(c=>{
+      if(isSold(c)&&!statuses.includes('售出'))return false; // Sold is never in default results.
       if(brands.length&&!brands.includes(c['廠牌']))return false;
       if(locations.length&&!locations.includes(c['在庫位子']))return false;
       if(forms.length&&!forms.includes(c['售賣形式']||'零售'))return false;
       if(statuses.length&&!statuses.includes(c['販售狀態']||'在庫'))return false;
+      if(min!==null||max!==null){const raw=carPrice(c),p=raw===''||raw===null||raw===undefined?NaN:Number(raw);if(!Number.isFinite(p)||(min!==null&&p<min)||(max!==null&&p>max))return false;}
       if(q&&!['廠牌','型號','年份','顏色','燃料形式','公開配備','在庫位子','優惠標籤'].some(k=>String(c[k]||'').toLowerCase().includes(q)))return false;
       return true;
     });
@@ -87,18 +94,36 @@
         '<div class="price-row">'+(discounted?'<div class="old-price">原價 '+safe(format(original))+' 萬</div>':'<span></span>')+'<strong>'+safe(format(p))+'<small> 萬</small></strong></div>'+
       '</div></article>';
   }
-  function render(){st.shown=filtered();$('result-count').textContent='符合 '+st.shown.length+' 台車';
-    // V4.7: use snapshot dates, not current filter, and Asia/Taipei calendar month.
-    const nowParts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
-    const currentMonth=nowParts.year+'-'+nowParts.month,year=nowParts.year;
-    const dateMonth=v=>{const m=String(v||'').match(/^(\d{4})[/-](\d{1,2})/);return m?m[1]+'-'+m[2].padStart(2,'0'):'';};
+  function thisMonthCarsV48(kind){const ym=thisMonthV48();
+    return st.cars.filter(c=>kind==='bought'?dateMonthV48(c['購入日期'])===ym:isSold(c)&&dateMonthV48(c['成交日期'])===ym)
+      .sort((a,b)=>String(kind==='bought'?b['購入日期']:b['成交日期']).localeCompare(String(kind==='bought'?a['購入日期']:a['成交日期'])));
+  }
+  function closeMonthCarsV48(){$('monthly-cars-modal').classList.add('hidden');}
+  function openMonthCarsV48(kind){
+    const title=kind==='bought'?'當月購買車輛':'當月售出車輛';
+    const cars=thisMonthCarsV48(kind),month=thisMonthV48(),host=$('monthly-cars-body');
+    $('monthly-cars-title').textContent=title;
+    $('monthly-cars-caption').textContent=month+' · 共 '+cars.length+' 台 · 點選縮圖可查看車輛詳情';
+    host.innerHTML=cars.length?cars.map(c=>{
+      const idx=st.cars.indexOf(c),cover=images(c)[0]||'';
+      const label=[c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' ');
+      const date=kind==='bought'?c['購入日期']:c['成交日期'];
+      return '<button class="erp48-mini-car" type="button" data-month-car="'+idx+'" aria-label="查看 '+safe(label)+' 詳情">'+
+        '<span class="erp48-mini-photo">'+(cover?'<img loading="lazy" src="'+safe(cover)+'" alt="'+safe(label)+'">':'<span>尚無照片</span>')+'</span>'+
+        '<span class="erp48-mini-copy"><strong>'+safe(label)+'</strong><small>'+safe(kind==='bought'?'購入 '+date:'售出 '+date)+'</small><em>'+safe(format(carPrice(c)))+' 萬 · '+safe(c['在庫位子']||'未分類')+'</em></span></button>';
+    }).join(''):'<div class="message-box">這個月份尚無符合的車輛。</div>';
+    $('monthly-cars-modal').classList.remove('hidden');
+  }
+  function render(){st.shown=filtered();
+    const min=val('price-min'),max=val('price-max'),bad=min!==''&&max!==''&&Number(min)>Number(max);
+    $('result-count').textContent=bad?'價格起點不可大於終點':'符合 '+st.shown.length+' 台車';
     $('count-stock').textContent=st.cars.filter(c=>!isSold(c)).length;
-    $('count-bought').textContent=st.cars.filter(c=>dateMonth(c['購入日期'])===currentMonth).length;
-    $('count-sold').textContent=st.cars.filter(c=>isSold(c)&&dateMonth(c['成交日期'])===currentMonth).length;
-    $('count-year-sold').textContent=st.cars.filter(c=>isSold(c)&&dateMonth(c['成交日期']).startsWith(year+'-')).length;
+    $('count-bought').textContent=thisMonthCarsV48('bought').length;
+    $('count-sold').textContent=thisMonthCarsV48('sold').length;
+    $('count-year-sold').textContent=st.cars.filter(c=>isSold(c)&&dateMonthV48(c['成交日期']).startsWith(taiwanNowPartsV48().year+'-')).length;
     $('car-grid').classList.remove('erp45-cols-1','erp45-cols-2','erp45-cols-4');$('car-grid').classList.add('erp45-cols-'+st.staffCols);$('car-grid').innerHTML=st.shown.map(card).join('');
     const m=$('message');m.classList.toggle('hidden',st.shown.length>0);
-    if(!st.shown.length&&!st.loading){m.textContent=st.cars.length?'目前沒有符合篩選條件的車輛。':'尚未發布車源，請管理員在 Google 後台按「發布員工車源」。';}
+    if(!st.shown.length&&!st.loading){m.textContent=bad?'請修正價格區間：最低價不能高於最高價。':st.cars.length?'目前沒有符合篩選條件的車輛。':'尚未發布車源，請管理員在 Google 後台按「發布員工車源」。';}
   }
   // V3.9: Password is a light UI gate only. The JSON itself remains publicly reachable.
   async function sha256Hex(text){
@@ -300,7 +325,12 @@
     admin.href=adminURL;gateAdmin.href=adminURL;admin.removeAttribute('aria-disabled');admin.rel='noopener noreferrer';
   }else {admin.addEventListener('click',e=>e.preventDefault());gateAdmin.addEventListener('click',e=>e.preventDefault());}
   $('staff-brand').textContent=String(cfg.BRAND||'車行 ERP');
-  $('search').addEventListener('input',render);$('sort').addEventListener('change',render);for(const [id,[_field,label]] of Object.entries(filterDefs))$('filter-'+id).addEventListener('change',()=>{updateFacetLabel(id,label);render();});$('filters-clear').addEventListener('click',()=>{document.querySelectorAll('.multi-menu input[type=checkbox]').forEach(c=>c.checked=false);for(const [id,[_field,label]] of Object.entries(filterDefs))updateFacetLabel(id,label);render();});
+  $('search').addEventListener('input',render);$('sort').addEventListener('change',render);for(const id of ['price-min','price-max'])$(id).addEventListener('input',render);for(const [id,[_field,label]] of Object.entries(filterDefs))$('filter-'+id).addEventListener('change',()=>{updateFacetLabel(id,label);if(id==='status')rebuildOptions();render();});$('filters-clear').addEventListener('click',()=>{document.querySelectorAll('.multi-menu input[type=checkbox]').forEach(c=>c.checked=false);$('price-min').value='';$('price-max').value='';for(const [id,[_field,label]] of Object.entries(filterDefs))updateFacetLabel(id,label);render();});
+  // Quick cards are a drill-down, not a change to the inventory filters.
+  for(const kind of ['bought','sold']){const stat=document.querySelector('[data-month-stat="'+kind+'"]');if(!stat)continue;stat.addEventListener('click',()=>openMonthCarsV48(kind));stat.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMonthCarsV48(kind);}});}
+  $('monthly-cars-close').addEventListener('click',closeMonthCarsV48);
+  $('monthly-cars-modal').addEventListener('click',e=>{if(e.target===$('monthly-cars-modal'))closeMonthCarsV48();});
+  $('monthly-cars-body').addEventListener('click',e=>{const b=e.target.closest('[data-month-car]');if(!b)return;const idx=Number(b.dataset.monthCar);closeMonthCarsV48();openCar(idx);});
   $('refresh').addEventListener('click',()=>load());
   $('staff-gate-form').addEventListener('submit',gateLogin);
   $('staff-gate-pass').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,128);});
@@ -337,7 +367,7 @@
   $('staff-print-run').addEventListener('click',printList);
   $('staff-print-options').addEventListener('change',e=>{const el=e.target.closest('input[data-print-kind]');if(!el)return;const v=printSelectedV45[el.dataset.printKind];if(el.checked)v.add(el.value);else v.delete(el.value);updatePrintCountV45();});
   $('staff-print-options').addEventListener('click',e=>{const b=e.target.closest('[data-print-all],[data-print-none]');if(!b)return;const kind=b.dataset.printAll||b.dataset.printNone;printSelectedV45[kind]=new Set(b.dataset.printAll===undefined?[]:printFieldsV45[kind].options);$('staff-print-options').querySelectorAll('input[data-print-kind="'+kind+'"]').forEach(el=>el.checked=printSelectedV45[kind].has(el.value));updatePrintCountV45();});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMobileSaveV47();closePrintDialogV45();closeLightbox();$('loan-modal').classList.add('hidden');closeCar();}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMonthCarsV48();closeMobileSaveV47();closePrintDialogV45();closeLightbox();$('loan-modal').classList.add('hidden');closeCar();}
     if(!$('lightbox').classList.contains('hidden')){if(e.key==='ArrowLeft')movePhoto(-1);if(e.key==='ArrowRight')movePhoto(1);}});
   showGateMessage('請輸入員工端密碼；若尚未設定，請管理員先到 Google 後台設定並發布。',false);
 })();
