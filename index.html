@@ -25,7 +25,7 @@ window.addEventListener('load', function(){
 </script></head><body>
 <section id="staff-gate" class="staff-gate" aria-label="員工端入口密碼">
  <form id="staff-gate-form" class="staff-gate-panel" autocomplete="off">
-  <img class="erp410-gate-logo" src="assets/company-logo.svg?v=4.10" alt="車行 ERP Logo" width="54" height="54" style="display:block;border-radius:14px;object-fit:contain;margin:auto"><p class="eyebrow">STAFF VIEW</p><h1>員工車源查詢</h1>
+  <img class="erp410-gate-logo erp412-logo" src="assets/company-logo.svg?v=4.12.0" alt="車行 ERP Logo" width="54" height="54" style="display:block;border-radius:14px;object-fit:contain;margin:auto"><p class="eyebrow">STAFF VIEW</p><h1>員工車源查詢</h1>
   <p class="small-muted">請輸入管理員在 Google 後台設定的員工端入口密碼。</p>
   <label for="staff-gate-pass">入口密碼</label>
   <input type="password" id="staff-gate-pass" required inputmode="none" pattern="[0-9]+" autocomplete="off" aria-label="數字入口密碼" placeholder="輸入數字密碼">
@@ -42,7 +42,7 @@ window.addEventListener('load', function(){
 </section>
 <div id="staff-app" class="hidden">
 <header class="staff-header"><div class="staff-shell staff-header-in">
-  <a href="./" class="identity identity-link"><img class="erp410-header-logo" src="assets/company-logo.svg?v=4.10" alt="車行 ERP Logo" width="45" height="45" style="display:block;border-radius:13px;object-fit:contain"><div><strong id="staff-brand">車行 ERP</strong><small>STAFF INVENTORY · READ ONLY</small></div></a>
+  <a href="./" class="identity identity-link"><img class="erp410-header-logo erp412-logo" src="assets/company-logo.svg?v=4.12.0" alt="車行 ERP Logo" width="45" height="45" style="display:block;border-radius:13px;object-fit:contain"><div><strong id="staff-brand">車行 ERP</strong><small>STAFF INVENTORY · READ ONLY</small></div></a>
   <nav class="header-actions"><a href="#" class="small-link" id="staff-admin-link" aria-disabled="true">登入後台</a><button type="button" class="small-link" id="staff-logout" style="border:0;background:transparent;cursor:pointer">離開唯讀</button><span class="chip">唯讀模式</span></nav>
 </div></header>
 <main class="staff-shell staff-main">
