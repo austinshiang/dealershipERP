@@ -195,70 +195,7 @@
   function pair(label,value){return '<div class="detail-pair"><b>'+safe(label)+'</b><span>'+safe(value===''||value===undefined||value===null?'—':value)+'</span></div>';}
   // V4.7 direct image downloads: no in-browser ZIP and no server-generated ZIP.
   // Browser security and Google Drive sharing settings determine whether each download starts.
-  function photoDriveIdV47(url){
-    const s=String(url||'');
-    const m=s.match(/(?:[?&]id=|\/file\/d\/|\/d\/)([a-zA-Z0-9_-]{20,})/);
-    return m?m[1]:'';
-  }
-  function photoOriginalV47(index){
-    const thumb=st.images[index];if(!thumb)return '';
-    const id=photoDriveIdV47(thumb);
-    return id?'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/view':safeURL(thumb);
-  }
-  function photoDirectDownloadV47(index){
-    const thumb=st.images[index];if(!thumb)return '';
-    const id=photoDriveIdV47(thumb);
-    return id?'https://drive.google.com/uc?export=download&id='+encodeURIComponent(id):safeURL(thumb);
-  }
-  function startPhotoDownloadV47(index){
-    const url=photoDirectDownloadV47(index);if(!url)return false;
-    // Cross-origin `download` is not guaranteed to be honored; _blank preserves the ERP page.
-    const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';
-    a.download='vehicle_photo_'+String(index+1).padStart(2,'0')+'.jpg';
-    document.body.appendChild(a);a.click();a.remove();return true;
-  }
-  function setDownloadNoteV47(message){const m=$('photo-download-status');if(m)m.textContent=message;}
-  function downloadOnePhotoV47(index){
-    if(!startPhotoDownloadV47(index))return;
-    setDownloadNoteV47('已開啟照片下載連結；如顯示預覽，請使用瀏覽器的「另存圖片」。');
-  }
-  function downloadAllPhotosV47(){
-    if(!st.images.length)return;
-    if(window.matchMedia('(pointer:coarse)').matches){
-      setDownloadNoteV47('手機請長按詳情大圖或逐張開啟原圖儲存；不會自動建立壓縮包。');return;
-    }
-    // Browsers may ask to allow automatic multiple downloads from this site.
-    // Synchronous click invocation keeps the operation tied to the user gesture.
-    let requested=0;
-    st.images.forEach((_,i)=>{if(startPhotoDownloadV47(i))requested++;});
-    setDownloadNoteV47('已送出 '+requested+' 張照片的下載請求。瀏覽器若要求權限，請允許「自動下載多個檔案」；Google Drive 可能改為預覽，可從下方逐張開啟原圖。');
-    const links=$('photo-manual-links');if(links){
-      links.innerHTML=st.images.map((_,i)=>'<a href="'+safe(photoOriginalV47(i))+'" target="_blank" rel="noopener noreferrer">原圖 '+(i+1)+'</a>').join('');
-      links.classList.remove('hidden');
-    }
-  }
-  let longPressTimerV47=null,longPressStartV47=null,preventPhotoClickUntilV47=0,mobilePhotoIndexV47=0;
-  function closeMobileSaveV47(){$('erp47-mobile-save')?.classList.add('hidden');}
-  function showMobileSaveV47(){
-    if(!st.images.length)return;
-    mobilePhotoIndexV47=st.photo;preventPhotoClickUntilV47=Date.now()+1200;
-    $('erp47-mobile-save')?.classList.remove('hidden');
-  }
-  function listenLongPressV47(element){
-    if(!element||element.dataset.erp47Longpress)return;
-    element.dataset.erp47Longpress='1';
-    element.addEventListener('touchstart',e=>{
-      if(e.touches.length!==1||!st.images.length)return;
-      const t=e.touches[0];longPressStartV47={x:t.clientX,y:t.clientY};
-      clearTimeout(longPressTimerV47);
-      longPressTimerV47=setTimeout(()=>{longPressTimerV47=null;showMobileSaveV47();},550);
-    },{passive:true});
-    element.addEventListener('touchmove',e=>{
-      if(!longPressStartV47||!e.touches.length)return;
-      const t=e.touches[0];if(Math.hypot(t.clientX-longPressStartV47.x,t.clientY-longPressStartV47.y)>12)clearTimeout(longPressTimerV47);
-    },{passive:true});
-    for(const ev of ['touchend','touchcancel'])element.addEventListener(ev,()=>{clearTimeout(longPressTimerV47);longPressStartV47=null;},{passive:true});
-  }
+  // V4.14: all photo downloading belongs to staff-photo-download.js.
   function openCar(index){const c=st.cars[index];if(!c)return;st.car=c;st.images=images(c);st.photo=0;
     $('modal-title').textContent=[c['年份'],c['廠牌'],c['型號']].filter(Boolean).join(' ');
     const img=st.images.length?'<img id="featured-img" src="'+safe(st.images[0])+'" alt="車輛照片">':'<span class="no-photo">尚未提供照片</span>';
@@ -276,10 +213,7 @@
       (c['公開配備']?'<h3>車輛特色與配備</h3><div class="detail-note">'+safe(c['公開配備'])+'</div>':'')+
       '<p class="small-muted">公開唯讀快照僅供參考，成交與報價前請向管理員再次核實。</p>';
     $('car-modal').classList.remove('hidden');document.body.style.overflow='hidden';
-    $('download-current-photo')?.addEventListener('click',()=>downloadOnePhotoV47(st.photo));
-    $('download-all-photos')?.addEventListener('click',downloadAllPhotosV47);
-    listenLongPressV47($('featured-img'));
-    $('featured').addEventListener('click',()=>{if(Date.now()<preventPhotoClickUntilV47)return;openLightbox();});
+    $('featured').addEventListener('click',()=>{if(window.ERP_PHOTO_DOWNLOAD_414?.suppressPhotoClick())return;openLightbox();});
     $('featured').addEventListener('keydown',e=>{if(e.key==='Enter')openLightbox();});
     $('thumbs')?.addEventListener('click',e=>{const b=e.target.closest('[data-photo]');if(b)selectPhoto(Number(b.dataset.photo));});
   }
@@ -288,7 +222,7 @@
     document.querySelectorAll('#thumbs [data-photo]').forEach(b=>b.classList.toggle('selected',Number(b.dataset.photo)===st.photo));
   }
   function closeCar(){st.car=null;$('car-modal').classList.add('hidden');document.body.style.overflow='';}
-  function openLightbox(){if(!st.images.length)return;$('lightbox').classList.remove('hidden');updateLightbox();listenLongPressV47($('lightbox-img'));}
+  function openLightbox(){if(!st.images.length)return;$('lightbox').classList.remove('hidden');updateLightbox();}
   function updateLightbox(){if(!st.images.length)return;$('lightbox-img').src=st.images[st.photo];$('lightbox-caption').textContent=(st.photo+1)+' / '+st.images.length;}
   function movePhoto(dir){if(!st.images.length)return;selectPhoto(st.photo+dir);updateLightbox();}
   function closeLightbox(){$('lightbox').classList.add('hidden');}
@@ -349,13 +283,9 @@
   $('car-modal').addEventListener('click',e=>{if(e.target===$('car-modal'))closeCar();});
   $('lightbox-close').addEventListener('click',closeLightbox);
   $('lightbox-prev').addEventListener('click',()=>movePhoto(-1));$('lightbox-next').addEventListener('click',()=>movePhoto(1));
-  $('erp47-mobile-close')?.addEventListener('click',closeMobileSaveV47);
-  $('erp47-mobile-save')?.addEventListener('click',e=>{if(e.target===$('erp47-mobile-save'))closeMobileSaveV47();});
-  $('erp47-mobile-download')?.addEventListener('click',()=>{downloadOnePhotoV47(mobilePhotoIndexV47);closeMobileSaveV47();});
-  $('erp47-mobile-open')?.addEventListener('click',()=>{
-    const href=photoOriginalV47(mobilePhotoIndexV47);
-    if(href)window.open(href,'_blank','noopener,noreferrer');closeMobileSaveV47();
-  });
+
+  // V4.14: legacy mobile download popup has no active event handlers.
+
   $('loan-open').addEventListener('click',()=>{$('loan-modal').classList.remove('hidden');calcLoan();});
   $('loan-close').addEventListener('click',()=>$('loan-modal').classList.add('hidden'));
   for(const id of ['loan-price','loan-down','loan-rate','loan-months'])$(id).addEventListener('input',calcLoan);
